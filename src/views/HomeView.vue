@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1>init props are: {{ firstnumber2 }} + {{ secondnumber2 }} </h1>
     <h1>Result is: {{ result }} </h1>
 
     <label>First Number</label>
@@ -28,6 +29,7 @@
 
 export default {
   name: "HomeView",
+  props: ['firstnumber2', 'secondnumber2'],
   data() {
     return {
       firstNumber: '',

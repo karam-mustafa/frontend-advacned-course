@@ -1,5 +1,6 @@
 <template>
   <div class="row px-5 py-5">
+    Results length: {{ $store.getters.getCardsFromFilter.length }}
     <table class="table">
       <thead>
         <tr>
@@ -11,7 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) of jsonData">
+        <tr v-for="(item, index) of $store.getters.getCardsFromFilter">
           <th scope="row">{{ index }}</th>
           <td>{{ item.title }}</td>
           <td><img width="100" height="100" :src="item.images[0]"></td>
@@ -28,11 +29,5 @@
 <script>
 export default {
   name: 'CardsComponent',
-  props: ['jsonData', 'displayedItem'],
-  methods: {
-    openItem(item) {
-      this.$emit('openItemInParent', item)
-    }
-  }
 }
 </script>

@@ -1,0 +1,1 @@
+(()=>{"use strict";document.querySelector(".email").addEventListener("input",(function(e){let t=document.querySelector(".required"),l=document.querySelector(".reqiredEmail");t.style.display="none",l.style.display="none",e.target.value||(t.style.display="block"),e.target.value.includes("@")||(l.style.display="block")}))})();

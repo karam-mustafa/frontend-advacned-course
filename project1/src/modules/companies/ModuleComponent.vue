@@ -31,13 +31,50 @@
             <v-btn color="blue-darken-1" variant="text" @click="close">
               Close
             </v-btn>
-            <v-btn color="blue-darken-1" variant="text" @click="save">
+            <v-btn v-if="!isEdit" color="blue-darken-1" variant="text" @click="newMethod">
               Save
+            </v-btn>
+            <v-btn v-if="isEdit" color="blue-darken-1" variant="text" @click="updateMethod">
+              Update
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-row>
+
+    <v-row style="margin: 20px 0" justify="center">
+      <v-dialog v-model="appliersDialog" persistent width="1024">
+        <v-card>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">
+                  User
+                </th>
+                <th class="text-left">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in jobOpened.users" :key="item">
+                <td>{{ item.email }}</td>
+                <v-btn style="margin: 6px 10px;" variant="flat" color="success" @click="acceptAppliers(item)">
+                  Accept
+                </v-btn>
+              </tr>
+            </tbody>
+          </v-table>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue-darken-1" variant="text" @click="appliersDialog = false">
+              Close
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+
     <v-table>
       <thead>
         <tr>
@@ -61,10 +98,13 @@
           <td>{{ item.description }}</td>
           <td>{{ item.specialization }}</td>
           <td>
+            <v-btn style="margin: 0 10px;" variant="flat" color="warning" @click="openAppliers(item)">
+              Appliers
+            </v-btn>
             <v-btn style="margin: 0 10px;" variant="flat" color="warning" @click="openEdit(item)">
               Edit
             </v-btn>
-            <v-btn style="margin: 0 10px;" variant="flat" color="error">
+            <v-btn style="margin: 0 10px;" variant="flat" color="error" @click="deleteMethod(item)">
               Delete
             </v-btn>
           </td>
@@ -81,11 +121,14 @@ export default {
   data() {
     return {
       dialog: false,
+      appliersDialog: false,
+      jobOpened: {},
       form: {
         specialization: '',
         description: '',
         title: ''
       },
+      isEdit: false,
       specializations: [
         'design',
         'web',
@@ -97,18 +140,26 @@ export default {
     ...mapState('companies', ['jobs']),
   },
   methods: {
-    ...mapActions('companies', ['newOrEdit']),
-    save() {
-      this.newOrEdit(this.form).then(() => {
-        this.dialog = false
+    ...mapActions('companies', ['new', 'update', 'delete', 'accept']),
+    newMethod() {
+      this.new(JSON.parse(JSON.stringify(this.form))).then(() => {
+        this.close();
       })
+    },
+    updateMethod() {
+      this.update(JSON.parse(JSON.stringify(this.form))).then(() => {
+        this.close();
+      })
+    },
+    deleteMethod(item) {
+      this.delete(item.id)
     },
     openEdit(item) {
       this.form.title = item.title;
       this.form.description = item.description;
       this.form.specialization = item.specialization;
       this.form.id = item.id;
-      this.form.isEdit = true;
+      this.isEdit = true;
       this.dialog = true;
     },
     close() {
@@ -116,6 +167,16 @@ export default {
       this.form.description = '';
       this.form.specialization = '';
       this.dialog = false;
+      this.isEdit = false;
+    },
+    openAppliers(item) {
+      this.jobOpened = item;
+      this.appliersDialog = true;
+    },
+    acceptAppliers(item) {
+      this.accept({ jobId: this.jobOpened.id, userEmail: item.email }).then(() => {
+        this.appliersDialog = false;
+      })
     }
   }
 }

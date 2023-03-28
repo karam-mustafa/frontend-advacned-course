@@ -25,28 +25,73 @@ export default {
     };
   },
   mutations: {
-    ADD_NEW_OR_EDIT(state, data) {
+    ADD_NEW(state, data) {
+      state.jobs = data;
+    },
+    UPDATE(state, data) {
       state.jobs = data;
     },
   },
   actions: {
-    newOrEdit({ commit, state }, toSet) {
+    new({ commit, state }, toSet) {
       let data = state.jobs;
-      if (toSet.isEdit) {
-        const item = state.jobs.find((item) => item.id == toSet.id);
-        if (item) {
-          data = [
-            toSet,
-            ...state.jobs.filter((el) => el.id != item.id),
-          ];
-        }
-        console.log('====================================');
-        console.log(data);
-        console.log('====================================');
+      data.push(toSet);
+      commit("ADD_NEW", data);
+      return true;
+    },
+
+    update({ commit, state }, toSet) {
+      let data = state.jobs;
+      const newData = [toSet, ...data.filter((item) => item.id != toSet.id)];
+      commit("UPDATE", newData);
+      return true;
+    },
+
+    delete({ commit, state }, id) {
+      let data = state.jobs;
+      commit(
+        "UPDATE",
+        data.filter((item) => item.id != id)
+      );
+      return true;
+    },
+
+    apply({ commit, state, dispatch }, info) {
+      let data = state.jobs;
+      const job = data.find((item) => item.id == info.jobId);
+      if (job.users && job.users.length) {
+        job.users.push({
+          email: info.userEmail,
+          isAccepted: false,
+        });
       } else {
-        data.push(toSet);
+        job.users = [
+          {
+            email: info.userEmail,
+            isAccepted: false,
+          },
+        ];
       }
-      commit("ADD_NEW_OR_EDIT", data);
+
+      dispatch("update", job);
+
+      return true;
+    },
+
+    accept({ commit, state, dispatch }, info) {
+      let data = state.jobs;
+      
+      const job = data.find((item) => item.id == info.jobId);
+
+      const userToAccept = job.users.find(user => user.email == info.userEmail);
+
+      userToAccept.isAccepted = true;
+
+      job.users = [userToAccept, ...job.users.filter(user => user.email != info.userEmail)];
+
+      dispatch("update", job);
+
+      return true;
     },
   },
   getters: {},
